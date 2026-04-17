@@ -12,7 +12,7 @@ export default function EventDetails({ event, onRegisterClick }: EventDetailsPro
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [isCopied, setIsCopied] = useState(false);
   const [showContactPopup, setShowContactPopup] = useState(false);
-  
+
   if (!event) return null;
 
   const expectationsList = Array.isArray(event?.expectations)
@@ -48,7 +48,7 @@ export default function EventDetails({ event, onRegisterClick }: EventDetailsPro
         <div className="relative w-full md:w-5/12 lg:w-5/12 overflow-hidden md:flex-shrink-0 flex flex-col bg-[#FAFAFA] p-4 md:p-8">
           {/* Top Navigation Overlays */}
           <div className="absolute top-4 left-4 p-2.5 bg-[#0057FF] backdrop-blur-xl rounded-full text-white cursor-pointer hover:bg-[#0057FF]/80 transition-all z-10 hidden md:flex items-center justify-center shadow-md">
-            <ArrowLeft className="w-5 h-5" onClick={() => window.history.length > 1 ? window.history.back() : window.location.href = '/'} />
+            <ArrowLeft className="w-5 h-5" onClick={() => window.history.length > 1 ? window.history.back() : window.location.href = '/events'} />
           </div>
           <div className="absolute top-4 right-4 flex gap-3 z-10">
             <div className="relative">
@@ -185,8 +185,8 @@ export default function EventDetails({ event, onRegisterClick }: EventDetailsPro
                   <h3 className="text-sm font-bold text-neutral-800 mb-4 tracking-widest uppercase">Terms & Conditions</h3>
                   <ul className="list-disc pl-5 space-y-2 mb-0">
                     {termsList.map((term: string, i: number) => (
-                      <li 
-                        key={i} 
+                      <li
+                        key={i}
                         className="text-neutral-500 text-[14px] leading-relaxed"
                         dangerouslySetInnerHTML={{ __html: term.replace(/\*(.*?)\*/g, '<strong class="font-bold text-neutral-800">$1</strong>') }}
                       />
@@ -197,7 +197,7 @@ export default function EventDetails({ event, onRegisterClick }: EventDetailsPro
 
               {event?.contact_us && (
                 <div className="mt-8 border-t border-neutral-100 pt-6">
-                  <button 
+                  <button
                     onClick={() => setShowContactPopup(true)}
                     className="flex items-center justify-center gap-2 w-full sm:w-auto text-[#0057FF] font-bold text-[15px] hover:text-[#0046CC] transition-colors bg-blue-50 px-5 py-3.5 rounded-xl cursor-pointer"
                   >
@@ -243,14 +243,14 @@ export default function EventDetails({ event, onRegisterClick }: EventDetailsPro
               Get Tickets
             </button>
           </div>
-      </div>
+        </div>
       </div>
 
       {/* Contact Organizer Popup */}
       {showContactPopup && event?.contact_us && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-opacity">
           <div className="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl relative animate-in zoom-in-95">
-            <button 
+            <button
               onClick={() => setShowContactPopup(false)}
               className="absolute top-4 right-4 p-2 text-neutral-400 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer"
             >
@@ -258,7 +258,7 @@ export default function EventDetails({ event, onRegisterClick }: EventDetailsPro
             </button>
             <h3 className="text-xl font-black text-neutral-900 tracking-tight mb-2">Need Help?</h3>
             <p className="text-neutral-500 text-[15px] font-medium mb-6">Reach out to the organizer for any queries regarding this event.</p>
-            
+
             <div className="flex flex-col gap-3">
               {event.contact_us.email && (
                 <a href={`mailto:${event.contact_us.email}`} className="flex items-center gap-3 p-4 rounded-xl bg-[#F8F9FA] hover:bg-[#F1F3F5] transition-colors border border-neutral-100">

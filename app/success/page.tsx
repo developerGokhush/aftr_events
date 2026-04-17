@@ -16,12 +16,12 @@ export default function SuccessPage() {
       const storedTickets = sessionStorage.getItem("success_tickets");
       if (!storedCodes) {
         // Redirect back home if accessed empty
-        router.push("/");
+        router.push("/events");
         return;
       }
       setQrCodes(JSON.parse(storedCodes));
       if (storedTickets) {
-          setTickets(JSON.parse(storedTickets));
+        setTickets(JSON.parse(storedTickets));
       }
       setIsReady(true);
 

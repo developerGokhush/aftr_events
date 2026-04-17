@@ -20,7 +20,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
         const tickets = sessionStorage.getItem("checkout_tickets");
 
         if (!amount || !tickets) {
-          router.push("/");
+          router.push("/events");
           return;
         }
 
@@ -149,7 +149,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
       totalAmount={totalAmount}
       tickets={selectedTickets}
       isProcessing={isProcessing}
-      onBack={() => router.push("/")}
+      onBack={() => router.push("/events")}
       onPay={handlePayment}
     />
   );
