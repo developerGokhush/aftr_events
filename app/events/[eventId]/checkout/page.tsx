@@ -115,14 +115,15 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           razorpayData,
-          userDetails: details,
+          userDetails: { ...details, event_id: resolvedParams.eventId },
           tickets: selectedTickets,
         }),
       });
       const data = await res.json();
-      if (data.success && data.bookings) {
-        const allCodes = data.bookings.flatMap((b: any) => b.qr_codes);
-        sessionStorage.setItem("success_qrcodes", JSON.stringify(allCodes));
+      if (data.success && data.bookings && data.bookings.length > 0) {
+        const bookingId = data.bookings[0].id;
+        sessionStorage.setItem("success_qrcodes", JSON.stringify([bookingId]));
+        sessionStorage.setItem("success_tickets", JSON.stringify(selectedTickets));
         router.push("/success");
       } else {
         alert("Booking confirmation failed.");

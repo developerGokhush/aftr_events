@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, MessageCircle, Mail, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle2, MessageCircle, Mail, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
 
 interface SuccessViewProps {
   qrCodes?: string[];
+  tickets?: any[];
 }
 
-export default function SuccessView({ qrCodes }: SuccessViewProps) {
+export default function SuccessView({ qrCodes, tickets }: SuccessViewProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const prevCode = () => {
@@ -19,7 +20,7 @@ export default function SuccessView({ qrCodes }: SuccessViewProps) {
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-8 text-center max-w-[640px] mx-auto min-h-screen bg-[#FAFAFA] font-sans selection:bg-[#0057FF]/20 selection:text-neutral-900">
+    <div className="flex-1 flex flex-col items-center justify-center w-full p-6 md:p-8 text-center mx-auto min-h-screen bg-[#FAFAFA] font-sans selection:bg-[#0057FF]/20 selection:text-neutral-900">
 
       <div className="mb-10 relative auto-animate mt-8">
         <div className="absolute inset-0 bg-[#0057FF]/20 blur-3xl opacity-40 rounded-full animate-pulse scale-150" />
@@ -32,7 +33,7 @@ export default function SuccessView({ qrCodes }: SuccessViewProps) {
       </p>
 
       {qrCodes && qrCodes.length > 0 && (
-        <div className="w-full bg-white border border-neutral-200 rounded-3xl p-6 md:p-8 mb-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <div className="w-full bg-white border border-neutral-200 rounded-3xl p-6 md:p-8 mb-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] max-w-[640px]">
           <h3 className="font-bold text-neutral-400 uppercase tracking-widest text-[13px] mb-5">Your Tickets</h3>
           <div className="flex items-center justify-center gap-4 mt-4">
 
@@ -45,14 +46,27 @@ export default function SuccessView({ qrCodes }: SuccessViewProps) {
             <div className="bg-neutral-50 border border-neutral-200 p-6 rounded-2xl shadow-sm text-center flex-1 max-w-[240px]">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrCodes[currentIndex]}`}
-                alt="Ticket QR Code"
+                alt="Ticket Booking QR Code"
                 className="w-40 h-40 mx-auto mb-5 rounded-lg border border-neutral-200 bg-white p-2"
               />
-              <span className="font-mono text-neutral-800 font-bold tracking-[0.15em] text-xl">
-                {qrCodes[currentIndex]}
+              <span className="font-mono text-neutral-800 font-bold tracking-[0.15em] text-[15px] block truncate">
+                {qrCodes[currentIndex].split('-')[0].substring(0, 8)}...
               </span>
+
+              {tickets && tickets.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-neutral-200 text-left">
+                  <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-2">Admitting:</p>
+                  {tickets.map((t, idx) => (
+                    <div key={idx} className="flex items-center justify-between mt-1 pt-1">
+                      <span className="text-[13px] text-neutral-600 font-medium truncate">{t.name}</span>
+                      <span className="text-[13px] text-neutral-900 font-bold ml-2">x{t.quantity}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {qrCodes.length > 1 && (
-                <p className="text-[13px] text-neutral-400 mt-4 font-bold uppercase tracking-wider">Ticket {currentIndex + 1} of {qrCodes.length}</p>
+                <p className="text-[13px] text-neutral-400 mt-4 font-bold uppercase tracking-wider">Booking {currentIndex + 1} of {qrCodes.length}</p>
               )}
             </div>
 
@@ -66,10 +80,32 @@ export default function SuccessView({ qrCodes }: SuccessViewProps) {
           <p className="text-[14px] text-neutral-500 mt-8 font-medium">
             Keep this pure QR code handy during check-in.
           </p>
+          <div className="mt-6 pt-6 border-t border-neutral-100 flex justify-center">
+            <button
+              onClick={() => {
+                const url = window.location.origin + '/bookings/' + qrCodes[0];
+                navigator.clipboard.writeText(url);
+                alert("Booking link copied to clipboard!");
+              }}
+              className="flex items-center gap-2 font-bold text-[#0057FF] bg-blue-50 px-5 py-3 rounded-full hover:bg-blue-100 transition-colors shadow-sm cursor-pointer"
+            >
+              <Share2 className="w-4 h-4" />
+              Copy Tracker Link
+            </button>
+            <button
+              onClick={() => {
+                const url = window.location.origin + '/bookings/' + qrCodes[0];
+                window.open(url, '_blank');
+              }}
+              className="flex items-center gap-2 font-bold text-neutral-600 bg-neutral-100 px-5 py-3 rounded-full hover:bg-neutral-200 transition-colors shadow-sm ml-3 cursor-pointer"
+            >
+              Open Receipt
+            </button>
+          </div>
         </div>
       )}
 
-      <div className="w-full bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-neutral-200 space-y-6 mb-10 text-[15px]">
+      <div className="w-full bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-neutral-200 space-y-6 mb-10 text-[15px] max-w-[640px]">
         <div className="flex items-start gap-5">
           <div className="bg-[#E6F4EA] border border-[#d6ebd9] p-3 rounded-2xl text-[#188038]">
             <MessageCircle className="w-6 h-6" />
@@ -94,7 +130,7 @@ export default function SuccessView({ qrCodes }: SuccessViewProps) {
       </div>
 
       <button
-        onClick={() => window.location.reload()}
+        onClick={() => window.location.href = '/events'}
         className="text-neutral-500 cursor-pointer font-bold text-[14px] uppercase tracking-widest hover:text-neutral-900 transition-colors drop-shadow-sm pb-10"
       >
         Return to Home

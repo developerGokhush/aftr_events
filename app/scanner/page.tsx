@@ -40,7 +40,9 @@ export default function ScannerPage() {
 
       if (res.ok && data.success) {
         setStatus("success");
-        setMessage(`Granted! ${data.details.ticket_type} (${data.details.user_name})`);
+        // Generate an array mapping of what to admit
+        const admitText = data.details.tickets?.map((t: any) => `${t.quantity}x ${t.name}`).join(", ") || "Unknown Tickets";
+        setMessage(`Admit: ${admitText} (${data.details.user_name})`);
       } else {
         setStatus("error");
         setMessage(data.error || "Verification failed");

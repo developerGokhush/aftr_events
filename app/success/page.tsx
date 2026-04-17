@@ -7,17 +7,22 @@ import SuccessView from "@/components/SuccessView";
 export default function SuccessPage() {
   const router = useRouter();
   const [qrCodes, setQrCodes] = useState<string[]>([]);
+  const [tickets, setTickets] = useState<any[]>([]);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedCodes = sessionStorage.getItem("success_qrcodes");
+      const storedTickets = sessionStorage.getItem("success_tickets");
       if (!storedCodes) {
         // Redirect back home if accessed empty
         router.push("/");
         return;
       }
       setQrCodes(JSON.parse(storedCodes));
+      if (storedTickets) {
+          setTickets(JSON.parse(storedTickets));
+      }
       setIsReady(true);
 
       // Optional: clear to prevent replays
@@ -35,5 +40,5 @@ export default function SuccessPage() {
     );
   }
 
-  return <SuccessView qrCodes={qrCodes} />;
+  return <SuccessView qrCodes={qrCodes} tickets={tickets} />;
 }

@@ -11,27 +11,25 @@ export async function POST(req: Request) {
 
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === "https://your-project.supabase.co") {
         // Mock Response for local dev
-        console.log("MOCK: Scanned", qr_code);
-        return NextResponse.json({ success: true, message: "Valid Ticket (Mock Mode)", details: { ticket_type: "Early Bird", user_name: "John Doe" } });
+        return NextResponse.json({ success: true, message: "Valid Ticket (Mock Mode)", details: { tickets: [{ name: "Early Bird", quantity: 2 }], user_name: "John Doe" } });
     }
 
-    // 1. Check if the QR Code exists in any bookings
-    // Using `contains` for array matching
+    // 1. Check if the QR Code (Booking ID) exists in bookings
     const { data: booking, error: findError } = await supabase
       .from("bookings")
       .select("*")
-      .contains("qr_codes", [qr_code])
+      .eq("id", qr_code)
       .single();
 
     if (findError || !booking) {
       return NextResponse.json({ error: "Invalid Ticket - Code not found in system." }, { status: 404 });
     }
 
-    // 2. Check if the QR code is ALREADY scanned
+    // 2. Check if the QR code (Booking ID) is ALREADY scanned
     const { data: scannedRecord, error: scanError } = await supabase
       .from("scanned_tickets")
       .select("id, scanned_at")
-      .eq("qr_code", qr_code)
+      .eq("booking_id", qr_code)
       .maybeSingle();
 
     if (scannedRecord) {
@@ -40,12 +38,12 @@ export async function POST(req: Request) {
       }, { status: 403 });
     }
 
-    // 3. Mark the QR Code as scanned
+    // 3. Mark the Booking as scanned
     const { error: insertError } = await supabase
       .from("scanned_tickets")
       .insert([
         { 
-          qr_code: qr_code, 
+          booking_id: qr_code, 
           event_id: booking.event_id 
         }
       ]);
@@ -59,7 +57,7 @@ export async function POST(req: Request) {
         message: "Entry Granted",
         details: {
             user_name: booking.user_name,
-            ticket_type: booking.ticket_type
+            tickets: booking.tickets
         }
      });
 

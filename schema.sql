@@ -35,16 +35,14 @@ CREATE TABLE IF NOT EXISTS bookings (
   user_name TEXT NOT NULL,
   user_email TEXT NOT NULL,
   user_phone TEXT NOT NULL,
-  ticket_type TEXT NOT NULL,
-  quantity INTEGER NOT NULL,
-  qr_codes TEXT[] NOT NULL
+  tickets JSONB NOT NULL
 );
 
 -- 4. Scanned Tickets Table
 CREATE TABLE IF NOT EXISTS scanned_tickets (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   scanned_at TIMESTAMPTZ DEFAULT NOW(),
-  qr_code TEXT UNIQUE NOT NULL,
+  booking_id UUID UNIQUE REFERENCES bookings(id),
   event_id UUID REFERENCES events(id)
 );
 
