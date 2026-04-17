@@ -124,9 +124,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
         const bookingId = data.bookings[0].id;
         sessionStorage.setItem("success_qrcodes", JSON.stringify([bookingId]));
         sessionStorage.setItem("success_tickets", JSON.stringify(selectedTickets));
-        router.push("/success");
         const url = window.location.origin + '/bookings/' + bookingId;
-        // window.open(url, '_blank');
         router.push(url)
       } else {
         alert("Booking confirmation failed.");
