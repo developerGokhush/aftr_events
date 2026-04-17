@@ -303,9 +303,14 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
 
         </div>
 
-        <div className="flex items-center gap-2 justify-center text-[11px] font-medium text-neutral-500 mb:mt-16 max-w-[400px] mx-auto text-center leading-relaxed">
-          <ShieldCheck className="w-5 h-5 text-neutral-400 flex-shrink-0" />
-          <span>Payments are processed securely through our encrypted payment gateway.</span>
+        <div className="flex flex-col items-center gap-3 justify-center text-[11px] font-medium text-neutral-500 mb:mt-16 max-w-[400px] mx-auto text-center leading-relaxed mb-8 md:mb-0">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-neutral-400 flex-shrink-0" />
+            <span>Payments are processed securely through our encrypted payment gateway.</span>
+          </div>
+          <p className="text-[11px] text-neutral-400 max-w-[300px] hidden md:block">
+            By proceeding with this payment, you agree to our <a href="/terms" target="_blank" className="underline text-neutral-500">Terms & Conditions</a> and <a href="/cancellation-policy" target="_blank" className="underline text-neutral-500">Cancellation Policy</a>.
+          </p>
         </div>
         {/* Desktop form submit button placed inline */}
         <div className="hidden md:block w-2/5">
@@ -365,7 +370,10 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
           </div>
         )}
 
-        <div className="bg-white/95 backdrop-blur-md p-4">
+        <div className="bg-white/95 backdrop-blur-md px-4 pt-3 pb-4">
+          <p className="text-[11px] text-neutral-400 text-center mb-3">
+            By proceeding, you agree to our <a href="/terms" target="_blank" className="underline text-neutral-500">Terms</a> and <a href="/cancellation-policy" target="_blank" className="underline text-neutral-500">Cancellation Policy</a>.
+          </p>
           <button
             type="submit"
             form="checkoutform"

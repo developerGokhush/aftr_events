@@ -133,7 +133,7 @@ export default function BookingPage({ params }: { params: Promise<{ bookingId: s
             <img src={heroImage} alt="Event" className="w-full h-full object-cover" />
           </div>
           <div className="flex flex-col py-1">
-            <h2 className="text-lg md:text-xl font-black leading-tight text-neutral-900 mb-2 truncate line-clamp-2 white-space-normal">
+            <h2 className="text-lg md:text-xl font-black leading-tight text-neutral-900 mb-2 break-words line-clamp-2 white-space-normal">
               {event?.name}
             </h2>
             <div className="flex items-center gap-2 text-neutral-500 text-[13px] font-medium mb-1.5">
@@ -246,6 +246,12 @@ export default function BookingPage({ params }: { params: Promise<{ bookingId: s
                   </ul>
                 </div>
               )}
+
+              <div className="mt-6 pt-5 border-t border-neutral-200">
+                <p className="text-[12px] text-neutral-400 font-medium leading-relaxed">
+                  Refer to the generic platform <a href="/terms" target="_blank" className="font-bold underline text-neutral-500 hover:text-neutral-800">Terms & Conditions</a> and <a href="/cancellation-policy" target="_blank" className="font-bold underline text-neutral-500 hover:text-neutral-800">Cancellation Policy</a> regarding refunds and liability.
+                </p>
+              </div>
             </div>
           </div>
         </div>

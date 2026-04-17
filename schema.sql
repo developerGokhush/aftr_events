@@ -13,8 +13,16 @@ CREATE TABLE IF NOT EXISTS events (
   time TEXT,
   location TEXT,
   expectations TEXT[],
-  image_url TEXT
+  image_urls TEXT[],
+  terms_conditions TEXT[],
+  contact_us JSONB,
+  is_active BOOLEAN DEFAULT true
 );
+
+-- Note: If you already created the events table, run these ALTER commands to add the new columns:
+-- ALTER TABLE events ADD COLUMN terms_conditions TEXT[];
+-- ALTER TABLE events ADD COLUMN contact_us JSONB;
+-- ALTER TABLE events ADD COLUMN is_active BOOLEAN DEFAULT true;
 
 -- 2. Ticket Types Table
 CREATE TABLE IF NOT EXISTS ticket_types (

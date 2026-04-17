@@ -129,7 +129,11 @@ export default function EventDetails({ event, onRegisterClick }: EventDetailsPro
           {/* Host Profile */}
           <div className="flex items-center gap-4 py-4 border-y border-neutral-100 mb-6">
             <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-blue-200 to-indigo-200 flex items-center justify-center text-blue-600 font-bold text-xl border-[3px] border-white shadow-sm">
-              A
+              {event?.event_host?.trim()
+                .split(/\s+/)
+                .slice(0, 2)
+                .map((word: string) => word.charAt(0).toUpperCase())
+                .join("")}
             </div>
             <div>
               <p className="text-xs text-neutral-400 font-bold tracking-wider uppercase mb-0.5">Organized by</p>
@@ -192,11 +196,16 @@ export default function EventDetails({ event, onRegisterClick }: EventDetailsPro
                       />
                     ))}
                   </ul>
+                  <div className="mt-5 pt-5 border-t border-neutral-200">
+                    <p className="text-[13px] text-neutral-500 font-medium">
+                      By purchasing, you also agree to the platform's general <a href="/terms" target="_blank" className="text-[#0057FF] hover:underline">Terms & Conditions</a> and <a href="/cancellation-policy" target="_blank" className="text-[#0057FF] hover:underline">Cancellation Policy</a>.
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {event?.contact_us && (
-                <div className="mt-8 border-t border-neutral-100 pt-6">
+              {event?.contact_host && (
+                <div className="mt-6 mb-4 flex justify-center border-t border-neutral-100 pt-6">
                   <button
                     onClick={() => setShowContactPopup(true)}
                     className="flex items-center justify-center gap-2 w-full sm:w-auto text-[#0057FF] font-bold text-[15px] hover:text-[#0046CC] transition-colors bg-blue-50 px-5 py-3.5 rounded-xl cursor-pointer"
@@ -207,7 +216,7 @@ export default function EventDetails({ event, onRegisterClick }: EventDetailsPro
                 </div>
               )}
 
-              <p className="text-[14px] text-neutral-500 font-medium pb-24 md:pb-0">
+              <p className="text-[14px] text-neutral-500 font-medium pb-0 md:pb-16">
                 * Note: Please make sure to bring your confirmation email. Specific venue rules apply.
               </p>
             </div>
@@ -247,7 +256,7 @@ export default function EventDetails({ event, onRegisterClick }: EventDetailsPro
       </div>
 
       {/* Contact Organizer Popup */}
-      {showContactPopup && event?.contact_us && (
+      {showContactPopup && event?.contact_host && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-opacity">
           <div className="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl relative animate-in zoom-in-95">
             <button
@@ -260,16 +269,16 @@ export default function EventDetails({ event, onRegisterClick }: EventDetailsPro
             <p className="text-neutral-500 text-[15px] font-medium mb-6">Reach out to the organizer for any queries regarding this event.</p>
 
             <div className="flex flex-col gap-3">
-              {event.contact_us.email && (
-                <a href={`mailto:${event.contact_us.email}`} className="flex items-center gap-3 p-4 rounded-xl bg-[#F8F9FA] hover:bg-[#F1F3F5] transition-colors border border-neutral-100">
+              {event.contact_host?.email && (
+                <a href={`mailto:${event.contact_host?.email}`} className="flex items-center gap-3 p-4 rounded-xl bg-[#F8F9FA] hover:bg-[#F1F3F5] transition-colors border border-neutral-100">
                   <Mail className="w-5 h-5 text-[#0057FF]" />
-                  <span className="font-bold text-neutral-900 text-sm">{event.contact_us.email}</span>
+                  <span className="font-bold text-neutral-900 text-sm">{event.contact_host?.email}</span>
                 </a>
               )}
-              {event.contact_us.phone && (
-                <a href={`tel:${event.contact_us.phone}`} className="flex items-center gap-3 p-4 rounded-xl bg-[#F8F9FA] hover:bg-[#F1F3F5] transition-colors border border-neutral-100">
+              {event.contact_host?.phone && (
+                <a href={`tel:${event.contact_host?.phone}`} className="flex items-center gap-3 p-4 rounded-xl bg-[#F8F9FA] hover:bg-[#F1F3F5] transition-colors border border-neutral-100">
                   <Phone className="w-5 h-5 text-[#0057FF]" />
-                  <span className="font-bold text-neutral-900 text-sm">{event.contact_us.phone}</span>
+                  <span className="font-bold text-neutral-900 text-sm">{event.contact_host?.phone}</span>
                 </a>
               )}
             </div>
