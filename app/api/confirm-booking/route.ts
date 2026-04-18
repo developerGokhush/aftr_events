@@ -63,7 +63,7 @@ export async function POST(req: Request) {
           let eventDetails: any = { name: "An Event", venue: "TBD", date: "TBD", time: "TBD", location: "" };
           const { data: eventData } = await supabase.from('events').select('name, date, time, venue, location').eq('id', event_id).single();
           if (eventData) {
-             eventDetails = eventData;
+            eventDetails = eventData;
           }
 
           // Dynamically capture the frontend app's origin domain (e.g. localhost or vercel)
@@ -80,17 +80,14 @@ export async function POST(req: Request) {
                   <a href="${appUrl}/bookings/${bookingId}" style="display: inline-block; background-color: #0057FF; color: #ffffff; text-decoration: none; padding: 14px 28px; font-size: 16px; font-weight: bold; border-radius: 10px; margin-bottom: 20px;">
                      View Digital Ticket & QR Code
                   </a>
-                  
-                  <p style="font-size: 12px; color: #a8a29e; margin-bottom: 5px;">Or access your ticket manually:</p>
-                  <p style="font-size: 12px; font-family: monospace; color: #78716c; word-break: break-all;">${appUrl}/bookings/${bookingId}</p>
               </div>
             `;
 
           const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1c1917;">
-              <h1 style="color: #0057FF; text-align: center;">Ticket Confirmed!</h1>
+              <h1 style="color: #0057FF; text-align: center;">${tickets.length > 1 ? "Tickets" : "Ticket"} Confirmed!</h1>
               <p style="font-size: 16px;">Hi ${name || 'there'},</p>
-              <p style="font-size: 16px; line-height: 1.5;">Your booking has been successfully secured. Tap the button below to load your personalized event dashboard containing your check-in QR code, cancellation policies, and live event details.</p>
+              <p style="font-size: 16px; line-height: 1.5;">Your booking for ${eventDetails.name} has been successfully secured. Tap the button below to load your personalized event dashboard containing your check-in QR code, cancellation policies, and event details.</p>
               
               <div style="margin-top: 30px;">
                 ${ticketsHTML}
@@ -117,7 +114,7 @@ export async function POST(req: Request) {
           await transporter.sendMail({
             from: `"Aftr Events" <${SMTP_EMAIL}>`,
             to: email,
-            subject: 'Your Indoor Picnic Tickets & QR Codes',
+            subject: `Your ${eventDetails.name} ${tickets.length > 1 ? "Tickets" : "Ticket"}`,
             html: htmlContent,
           });
 
