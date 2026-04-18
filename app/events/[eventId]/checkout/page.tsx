@@ -73,7 +73,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
         amount: calculatedAmount * 100,
         currency: "INR",
         name: "Aftr Hyderabad",
-        description: "Event Tickets",
+        description: `Event ${selectedTickets?.length > 1 ? "Tickets" : "Ticket"} - ${eventData?.name}`,
         order_id: order_id,
         handler: async function (response: any) {
           console.log("Payment successful", response);
@@ -91,7 +91,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
           contact: details.phone,
         },
         theme: {
-          color: "#FF5A5F",
+          color: "#0057ff",
         },
       };
 
