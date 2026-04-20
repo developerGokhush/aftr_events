@@ -188,6 +188,20 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
 
   return (
     <div className="w-full bg-[#FAFAFA] min-h-screen pb-24 md:pb-0 animate-page-transition">
+      {isProcessing && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/80 backdrop-blur-md px-4">
+          <div className="bg-white p-6 md:p-8 rounded-3xl shadow-2xl flex flex-col items-center max-w-sm w-full text-center border border-neutral-100 animate-in zoom-in-95 duration-200">
+            <div className="w-14 h-14 border-4 border-[#0057FF]/20 border-t-[#0057FF] rounded-full animate-spin mb-6"></div>
+            <h3 className="text-xl font-black text-neutral-900 mb-2">Processing Booking</h3>
+            <p className="text-neutral-600 font-medium leading-relaxed text-[15px]">
+              Please wait while we securely process your payment.
+              <br/>
+              <span className="text-red-500 font-bold inline-block mt-2">Do not refresh or exit this page.</span>
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="sticky top-0 bg-white/90 backdrop-blur-xl z-20 p-4 md:px-8 border-b border-neutral-100 flex items-center gap-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
         <button onClick={onBack} className="p-2 -ml-2 cursor-pointer rounded-full hover:bg-neutral-100 transition-colors">
           <ArrowLeft className="w-5 h-5 text-neutral-600" />

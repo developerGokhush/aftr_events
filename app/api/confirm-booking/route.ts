@@ -67,7 +67,7 @@ export async function POST(req: Request) {
           }
 
           // Dynamically capture the frontend app's origin domain (e.g. localhost or vercel)
-          const appUrl = req.headers.get("origin") || "https://yourdomain.com";
+          const appUrl = req.headers.get("origin") || "https://aftr.gokhush.com";
 
           // Generate an HTML description of the tickets included in this booking
           const ticketsDescription = tickets.map((t: any) => `${t.quantity}x ${t.name}`).join(', ');
