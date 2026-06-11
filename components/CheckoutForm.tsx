@@ -133,7 +133,7 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
 
   const subtotal = tickets.reduce((sum, t) => sum + (t.price * t.quantity), 0);
   const totalTicketCount = tickets.reduce((sum, t) => sum + t.quantity, 0);
-  
+
   let discount = 0;
   if (appliedCoupon) {
     if (appliedCoupon.offer_type === 'percent') {
@@ -143,7 +143,7 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
     }
   }
   discount = Math.min(discount, subtotal);
-  
+
   const discountedSubtotal = Math.max(0, subtotal - discount);
 
   const gst = event?.has_gst ? discountedSubtotal * event?.gst_percent / 100 : 0;
@@ -192,6 +192,8 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
       newErrors.phone = "Please enter a valid 10-digit phone number.";
       hasError = true;
     }
+
+    sessionStorage.setItem('coupon_details', JSON.stringify({ ...appliedCoupon }));
 
     setErrors(newErrors);
 

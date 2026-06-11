@@ -10,6 +10,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [selectedTickets, setSelectedTickets] = useState<any[]>([]);
   const [eventData, setEventData] = useState<any>(null);
+  const [couponDetails, setCouponDetails] = useState<any>({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [isReady, setIsReady] = useState(true);
 
@@ -17,7 +18,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
     async function bootstrapCheckout() {
       if (typeof window !== "undefined") {
         const amount = sessionStorage.getItem("checkout_amount");
-        const tickets = sessionStorage.getItem("checkout_tickets");
+        const tickets = JSON.parse(sessionStorage.getItem("checkout_tickets") || "{}");
+        const coupon = JSON.parse(sessionStorage.getItem("coupon_details") || "{}");
 
         if (!amount || !tickets) {
           router.push("/events");
@@ -32,15 +34,30 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
           console.error("Failed to fetch event database details on checkout route");
         }
 
-        setTotalAmount(parseFloat(amount));
-        setSelectedTickets(JSON.parse(tickets));
+        const subtotal = tickets.reduce((sum: number, t: { price: number; quantity: number; }) => sum + (t.price * t.quantity), 0);
+
+        let discount = 0;
+        if (coupon) {
+          if (coupon.offer_type === 'percent') {
+            discount = (subtotal * coupon.off_value) / 100;
+          } else {
+            discount = coupon.off_value;
+          }
+        }
+        discount = Math.min(discount, subtotal);
+
+        const discountedSubtotal = Math.max(0, subtotal - discount);
+
+        setTotalAmount(discountedSubtotal);
+        setSelectedTickets(tickets);
+        setCouponDetails(coupon);
         setIsReady(true);
       }
     }
     bootstrapCheckout();
   }, [router, resolvedParams.eventId]);
 
-  const handlePayment = async (details: { name: string; email: string; phone: string }) => {
+  const handlePayment = async (details: { name: string; email: string; phone: string; couponCode: string | null }) => {
     setIsProcessing(true);
     let order_id = "";
     let calculatedAmount = 0;
@@ -49,7 +66,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
       const res = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tickets: selectedTickets })
+        body: JSON.stringify({ tickets: selectedTickets, coupon: couponDetails })
       });
       const orderData = await res.json();
 
@@ -89,6 +106,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
           name: details.name,
           email: details.email,
           contact: details.phone,
+          coupon_code: details.couponCode,
         },
         theme: {
           color: "#0057ff",

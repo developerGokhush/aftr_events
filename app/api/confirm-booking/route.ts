@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const { name, email, phone, event_id } = userDetails;
+    const { name, email, phone, event_id, couponCode } = userDetails;
 
     // Insert ONE single consolidated row into bookings
     const rowToInsert = {
@@ -35,7 +35,8 @@ export async function POST(req: Request) {
       user_email: email,
       user_phone: phone,
       tickets: tickets,      // The array of {name, quantity, price} objects
-      event_id: event_id     // Ensure the event id is logged
+      event_id: event_id,     // Ensure the event id is logged
+      coupon_code: couponCode,
     };
 
     // Write to Supabase 'bookings' table

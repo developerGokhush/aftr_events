@@ -9,7 +9,7 @@ const razorpay = new Razorpay({
 
 export async function POST(req: Request) {
   try {
-    const { tickets } = await req.json();
+    const { tickets, coupon } = await req.json();
 
     if (!tickets || !tickets.length) {
       return NextResponse.json({ error: "No tickets selected." }, { status: 400 });
@@ -43,6 +43,18 @@ export async function POST(req: Request) {
           backendCalculatedTotal += (Number(trueDbTicket.price) * Number(clientTicket.quantity));
         }
       });
+
+      let discount = 0;
+      if (coupon) {
+        if (coupon.offer_type === 'percent') {
+          discount = (backendCalculatedTotal * coupon.off_value) / 100;
+        } else {
+          discount = coupon.off_value;
+        }
+      }
+      discount = Math.min(discount, backendCalculatedTotal);
+
+      backendCalculatedTotal = Math.max(0, backendCalculatedTotal - discount);
     }
 
     // Razorpay amount MUST be in paise
