@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ArrowLeft, ShieldCheck, Ticket, Tag, ChevronUp, ChevronDown } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface CheckoutFormProps {
   event?: any;
@@ -72,27 +73,33 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
       </div>
 
       <div className="flex flex-col gap-3 hidden md:block">
-        {(event?.has_gst || event?.has_platform_fee || event?.has_payment_charge) && (
+        {(event?.has_gst || event?.has_platform_fee || event?.has_payment_charge || appliedCoupon) && (
           <div>
             <div className="border-t border-neutral-100 my-5"></div>
             <div className="flex justify-between text-[#4b5563] font-medium text-[15px]">
               <span>Subtotal ({totalTicketCount} tickets)</span>
               <span className="font-bold text-neutral-800">₹{subtotal.toFixed(2)}</span>
             </div>
+            {appliedCoupon && (
+              <div className="flex justify-between text-emerald-600 font-medium text-[15px] mt-1">
+                <span>Discount ({appliedCoupon.name})</span>
+                <span className="font-bold">-₹{discount.toFixed(2)}</span>
+              </div>
+            )}
             {event?.has_gst &&
-              <div className="flex justify-between text-[#4b5563] font-medium text-[15px]">
+              <div className="flex justify-between text-[#4b5563] font-medium text-[15px] mt-1">
                 <span>GST</span>
                 <span className="font-bold text-neutral-800">₹{gst.toFixed(2)}</span>
               </div>
             }
             {event?.has_platform_fee &&
-              <div className="flex justify-between text-[#4b5563] font-medium text-[15px]">
+              <div className="flex justify-between text-[#4b5563] font-medium text-[15px] mt-1">
                 <span>Platform Fee</span>
                 <span className="font-bold text-neutral-800">₹{platformFee.toFixed(2)}</span>
               </div>
             }
             {event?.has_payment_charge &&
-              <div className="flex justify-between text-[#4b5563] font-medium text-[15px]">
+              <div className="flex justify-between text-[#4b5563] font-medium text-[15px] mt-1">
                 <span>Payment Gateway Fee</span>
                 <span className="font-bold text-neutral-800">₹{pgFee.toFixed(2)}</span>
               </div>
@@ -108,6 +115,10 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
   );
 
   const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ name: string, offer_type: string, off_value: number } | null>(null);
+  const [couponError, setCouponError] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -122,10 +133,23 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
 
   const subtotal = tickets.reduce((sum, t) => sum + (t.price * t.quantity), 0);
   const totalTicketCount = tickets.reduce((sum, t) => sum + t.quantity, 0);
-  const gst = event?.has_gst ? subtotal * event?.gst_percent / 100 : 0;
+  
+  let discount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.offer_type === 'percent') {
+      discount = (subtotal * appliedCoupon.off_value) / 100;
+    } else {
+      discount = appliedCoupon.off_value;
+    }
+  }
+  discount = Math.min(discount, subtotal);
+  
+  const discountedSubtotal = Math.max(0, subtotal - discount);
+
+  const gst = event?.has_gst ? discountedSubtotal * event?.gst_percent / 100 : 0;
   const platformFee = event?.has_platform_fee ? event?.platform_fee : 0;
-  const pgFee = event?.has_payment_charge ? (subtotal + gst + platformFee) * event?.payment_charges / 100 : 0;
-  const finalComputedTotal = (subtotal + gst + platformFee + pgFee).toFixed(2);
+  const pgFee = event?.has_payment_charge ? (discountedSubtotal + gst + platformFee) * event?.payment_charges / 100 : 0;
+  const finalComputedTotal = (discountedSubtotal + gst + platformFee + pgFee).toFixed(2);
 
   const handleBlur = (field: 'name' | 'email' | 'phone') => {
     let errorMsg = "";
@@ -173,17 +197,45 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
 
     if (hasError) return;
 
-    onPay(formData);
+    onPay({ ...formData, couponCode: appliedCoupon?.name || null });
   };
 
   const isFormIncomplete = !formData.name.trim() || !formData.email.trim() || !formData.phone.trim();
   const hasErrors = Object.values(errors).some(err => err !== "");
   const isPayDisabled = isFormIncomplete || hasErrors || isProcessing;
 
-  const handleApplyCoupon = () => {
-    // Basic UI placeholder for when we wire up to the new DB table
+  const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
-    alert(`Checking coupon: ${couponCode}`);
+    setIsApplyingCoupon(true);
+    setCouponError("");
+
+    try {
+      const { data, error } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('name', couponCode.trim())
+        .eq('event_id', event?.id)
+        .single();
+
+      if (error || !data) {
+        setCouponError("Invalid coupon code");
+        setAppliedCoupon(null);
+      } else {
+        setAppliedCoupon({ name: data.name, offer_type: data.offer_type, off_value: Number(data.off_value) });
+        setCouponError("");
+      }
+    } catch (err) {
+      setCouponError("Failed to apply coupon");
+      setAppliedCoupon(null);
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError("");
   };
 
   return (
@@ -195,7 +247,7 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
             <h3 className="text-xl font-black text-neutral-900 mb-2">Processing Booking</h3>
             <p className="text-neutral-600 font-medium leading-relaxed text-[15px]">
               Please wait while we securely process your payment.
-              <br/>
+              <br />
               <span className="text-red-500 font-bold inline-block mt-2">Do not refresh or exit this page.</span>
             </p>
           </div>
@@ -295,17 +347,31 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
                     placeholder="Enter Coupon Code"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    disabled={!!appliedCoupon || isApplyingCoupon}
                     className="flex-1 px-4 text-neutral-900 font-bold placeholder:text-neutral-400 placeholder:font-medium bg-transparent focus:outline-none uppercase tracking-widest placeholder:normal-case placeholder:tracking-normal w-full"
                   />
                   <div className="w-px h-6 bg-neutral-200 shrink-0" />
-                  <button
-                    type="button"
-                    onClick={handleApplyCoupon}
-                    className="px-6 font-bold cursor-pointer text-neutral-900 hover:text-[#0057FF] transition-colors h-full shrink-0"
-                  >
-                    Apply
-                  </button>
+                  {appliedCoupon ? (
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="px-6 font-bold cursor-pointer text-red-500 hover:text-red-600 transition-colors h-full shrink-0"
+                    >
+                      Remove
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={isApplyingCoupon || !couponCode.trim()}
+                      className="px-6 font-bold cursor-pointer text-neutral-900 hover:text-[#0057FF] transition-colors h-full shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isApplyingCoupon ? "Applying..." : "Apply"}
+                    </button>
+                  )}
                 </div>
+                {couponError && <p className="text-sm font-medium text-red-500 mt-1">{couponError}</p>}
+                {appliedCoupon && <p className="text-sm font-medium text-emerald-600 mt-1">Coupon applied successfully! (-₹{discount.toFixed(2)})</p>}
               </div>
             </div>
           </div>
@@ -344,7 +410,7 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
 
       {/* Mobile sticky submit button */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-20">
-        {(event?.has_gst || event?.has_platform_fee || event?.has_payment_charge) && (
+        {(event?.has_gst || event?.has_platform_fee || event?.has_payment_charge || appliedCoupon) && (
           <div className="bg-[#f8f9fa] border-t border-[#e5e7eb] w-full text-[15px]">
             <button
               type="button"
@@ -367,18 +433,30 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
                   <span>Subtotal ({totalTicketCount} tickets)</span>
                   <span className="font-bold text-[#1f2937]">₹{subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-[#4b5563] font-medium text-sm">
-                  <span>GST</span>
-                  <span className="font-bold text-[#1f2937]">₹{gst?.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-[#4b5563] font-medium text-sm">
-                  <span>Platform Fee</span>
-                  <span className="font-bold text-[#1f2937]">₹{platformFee?.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-[#4b5563] font-medium text-sm">
-                  <span>Payment Gateway Fee</span>
-                  <span className="font-bold text-[#1f2937]">₹{pgFee?.toFixed(2)}</span>
-                </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-emerald-600 font-medium text-sm">
+                    <span>Discount ({appliedCoupon.name})</span>
+                    <span className="font-bold">-₹{discount.toFixed(2)}</span>
+                  </div>
+                )}
+                {event?.has_gst && (
+                  <div className="flex justify-between text-[#4b5563] font-medium text-sm">
+                    <span>GST</span>
+                    <span className="font-bold text-[#1f2937]">₹{gst?.toFixed(2)}</span>
+                  </div>
+                )}
+                {event?.has_platform_fee && (
+                  <div className="flex justify-between text-[#4b5563] font-medium text-sm">
+                    <span>Platform Fee</span>
+                    <span className="font-bold text-[#1f2937]">₹{platformFee?.toFixed(2)}</span>
+                  </div>
+                )}
+                {event?.has_payment_charge && (
+                  <div className="flex justify-between text-[#4b5563] font-medium text-sm">
+                    <span>Payment Gateway Fee</span>
+                    <span className="font-bold text-[#1f2937]">₹{pgFee?.toFixed(2)}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
