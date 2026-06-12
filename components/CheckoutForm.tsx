@@ -193,13 +193,11 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
       hasError = true;
     }
 
-    sessionStorage.setItem('coupon_details', JSON.stringify({ ...appliedCoupon }));
-
     setErrors(newErrors);
 
     if (hasError) return;
 
-    onPay({ ...formData, couponCode: appliedCoupon?.name || null });
+    onPay({ ...formData, couponCode: appliedCoupon || null });
   };
 
   const isFormIncomplete = !formData.name.trim() || !formData.email.trim() || !formData.phone.trim();
@@ -225,6 +223,7 @@ export default function CheckoutForm({ event, totalAmount, tickets, isProcessing
       } else {
         setAppliedCoupon({ name: data.name, offer_type: data.offer_type, off_value: Number(data.off_value) });
         setCouponError("");
+        sessionStorage.setItem('coupon_details', JSON.stringify({ ...appliedCoupon }));
       }
     } catch (err) {
       setCouponError("Failed to apply coupon");

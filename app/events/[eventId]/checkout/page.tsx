@@ -57,7 +57,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
     bootstrapCheckout();
   }, [router, resolvedParams.eventId]);
 
-  const handlePayment = async (details: { name: string; email: string; phone: string; couponCode: string | null }) => {
+  const handlePayment = async (details: { name: string; email: string; phone: string; couponCode: any }) => {
     setIsProcessing(true);
     let order_id = "";
     let calculatedAmount = 0;
@@ -66,7 +66,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
       const res = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tickets: selectedTickets, coupon: couponDetails })
+        body: JSON.stringify({ tickets: selectedTickets, coupon: details?.couponCode })
       });
       const orderData = await res.json();
 
@@ -75,6 +75,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ eventId: st
         setIsProcessing(false);
         return;
       }
+
+      sessionStorage.removeItem("coupon_details")
 
       order_id = orderData.order_id;
       calculatedAmount = orderData.amount;
